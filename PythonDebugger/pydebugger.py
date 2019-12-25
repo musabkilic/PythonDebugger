@@ -1,5 +1,6 @@
 import sys
 import inspect
+import copy
 
 class Debugger:
     def __init__(self):
@@ -25,5 +26,5 @@ class Debugger:
             cur = frame.f_locals.get(name, None)
             prev = self.prevVar.get(name, None)
             if cur != prev:
-                print(f"Line {line}: {repr(name)} changed from {repr(prev)} to {repr(cur)}")
-        self.prevVar = dict(frame.f_locals)
+                print(f"Line {line-1}: {repr(name)} changed from {repr(prev)} to {repr(cur)}")
+        self.prevVar = copy.deepcopy(frame.f_locals)
