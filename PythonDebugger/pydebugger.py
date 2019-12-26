@@ -26,5 +26,22 @@ class Debugger:
             cur = frame.f_locals.get(name, None)
             prev = self.prevVar.get(name, None)
             if cur != prev:
-                print(f"Line {line-1}: {repr(name)} changed from {repr(prev)} to {repr(cur)}")
+                if type(cur) == list and type(prev) == list:
+                    print(f"Line {line-1}: {repr(name)} of type {type(cur)}:")
+                    C, P = len(cur), len(prev)
+                    for i in range(max(C, P)):
+                        a = cur[i] if i < C else None
+                        b = prev[i] if i < P else None
+                        if a != b:
+                            print(f"* {name}[{repr(i)}] changed from {repr(b)} to {repr(a)}")
+                elif type(cur) == dict and type(prev) == dict:
+                    print(f"Line {line-1}: {repr(name)} of type {type(cur)}:")
+                    K = set(cur.keys()) | set(prev.keys())
+                    for k in K:
+                        a = cur.get(k)
+                        b = prev.get(k)
+                        if a != b:
+                            print(f"* {name}[{repr(k)}] changed from {repr(b)} to {repr(a)}")
+                else:
+                    print(f"Line {line-1}: {repr(name)} of type {type(cur)} changed from {repr(prev)} to {repr(cur)}")
         self.prevVar = copy.deepcopy(frame.f_locals)
