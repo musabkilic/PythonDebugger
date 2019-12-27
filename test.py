@@ -14,7 +14,7 @@ def sample(a, b):
     d["alice"] += 8
     d["chloe"] = 98
     for i in range(x):
-        j = i ** 2
+        j = i ** i
     print('Sample: ' + str(y))
 
 sample(2, 4)
