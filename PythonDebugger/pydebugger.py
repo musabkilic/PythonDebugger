@@ -9,19 +9,19 @@ class Debugger:
         self.prevVar = {}
         self.history = {}
         self.lineHistory = {}
-        self.last_exec = time.clock() * 10**6
+        self.last_exec = time.time() * 10**6
         sys.settrace(self.trace_calls)
 
     def debug(self, func):
         self.DEBUGGING[func.__name__] = {}
         def debug_wrapper(*args):
-            self.DEBUGGING[func.__name__]["started"] = time.clock() * 10**6
-            self.last_exec = time.clock() * 10**6
+            self.DEBUGGING[func.__name__]["started"] = time.time() * 10**6
+            self.last_exec = time.time() * 10**6
             func(*args)
         return debug_wrapper
 
     def printHistory(self):
-        total_time = time.clock()*10**6 - self.DEBUGGING[list(self.history.values())[-1][0][2].co_name]["started"]
+        total_time = time.time()*10**6 - self.DEBUGGING[list(self.history.values())[-1][0][2].co_name]["started"]
         for k in self.history:
             H = self.history[k]
             t = type(H[-1][0])
@@ -48,7 +48,7 @@ class Debugger:
         line = frame.f_lineno
         frame.f_code.co_argcount
         #print(line-1, event)
-        self.lineHistory[line] = self.lineHistory.get(line, []) + [(time.clock()*10**6-self.last_exec)*10]
+        self.lineHistory[line] = self.lineHistory.get(line, []) + [(time.time()*10**6-self.last_exec)*10]
         lH = self.lineHistory[line]
         for name in frame.f_code.co_varnames:
             cur = frame.f_locals.get(name, None)
@@ -74,6 +74,6 @@ class Debugger:
                 else:
                     print(f"Line {line-1}[Executed {len(lH)} times; Time spent avg:{sum(lH)/len(lH)}μs total:{sum(lH)}μs]: {repr(name)} of type {type(cur)} changed from {repr(prev)} to {repr(cur)}")
         self.prevVar = copy.deepcopy(frame.f_locals)
-        self.last_exec = time.clock() * 10**6
+        self.last_exec = time.time() * 10**6
         if event == "return":
             self.printHistory()
