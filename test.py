@@ -1,9 +1,4 @@
-import PythonDebugger
-
-db = PythonDebugger.Debugger()
-
-@db.debug
-def sample(a, b):
+def main(a, b):
     x = a + b
     y = x * 2
     r = list(range(a, y))
@@ -17,4 +12,14 @@ def sample(a, b):
         j = i ** i
     print('Sample: ' + str(y))
 
-sample(2, 4)
+def primeNumbersUpTo(n):
+    for i in range(2, n):
+        for j in range(2, int(i**.5)+1):
+            if i % j == 0:
+                break
+        else:
+            print(i)
+
+if __name__ == "__main__":
+    primeNumbersUpTo(10)
+    main(2, 4)
