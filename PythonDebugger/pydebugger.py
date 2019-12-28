@@ -48,7 +48,7 @@ class Debugger:
         actual_print(f"Total execution time: {total_time}μs")
 
     def trace_calls(self, frame, event, arg):
-        if frame.f_back.f_code.co_filename == self.debugging_file:
+        if frame.f_back and frame.f_back.f_code.co_filename == self.debugging_file:
             if len(self.DEBUGGING) == 0:
                 self.DEBUGGING[frame.f_code.co_name] = {}
                 self.DEBUGGING[frame.f_code.co_name]["started"] = time.time() * 10**6
