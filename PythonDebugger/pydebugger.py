@@ -123,6 +123,7 @@ if __name__ == "__main__":
 
             actual_print = print
             def print(x, end="\n"):
+                #https://stackoverflow.com/a/2749857
                 frame = inspect.currentframe()
                 frame = inspect.getouterframes(frame)[1]
                 if frame.frame.f_code.co_name in db.DEBUGGING:
