@@ -6,6 +6,12 @@ import os
 import importlib.util
 import json
 
+# https://stackoverflow.com/questions/8230315/how-to-json-serialize-sets
+class SetEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, set):
+            return list(obj)
+            return json.JSONEncoder.default(self, obj)
 
 class Debugger:
     def __init__(self, debugging_file=None):
@@ -35,7 +41,7 @@ class Debugger:
             actual_print(f"\nVariable {repr(k)} of type {t}, initiliazed at function {repr(H[0][2].co_name)} at line {H[0][1]}:")
             if t in [int, float]:
                 #print(H, H[0][0])
-                m, M = min(H, key=lambda x: x[0])[0], max(H, key=lambda x: x[0])[0]
+                m, M = min(H, key=lambda x: x[0] if type(x[0])==t else float("inf"))[0], max(H, key=lambda x: x[0] if type(x[0])==t else float("-inf"))[0]
                 actual_print(f"* Variable was in range: {m}-{M}")
             else:
                 actual_print(f"* Variable was in this list of values: {list(set([repr(x[0]) for x in H]))}")
@@ -112,15 +118,6 @@ if __name__ == "__main__":
         p = sys.argv[1]
         if p.endswith(".py"):
             db = Debugger(p)
-            if len(sys.argv) > 2:
-                db.DEBUGGING[sys.argv[2]] = {}
-            else:
-                spec = importlib.util.spec_from_file_location("debugging", p)
-                debugging = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(debugging)
-                if (hasattr(debugging, 'main') and inspect.isfunction(debugging.main)):
-                    db.DEBUGGING["main"] = {}
-
             actual_print = print
             def print(x, end="\n"):
                 #https://stackoverflow.com/a/2749857
@@ -140,13 +137,21 @@ if __name__ == "__main__":
 
                     db.outputs.append({"print":"".join(names), "timestamp":time.time()-db.debugging_started})
                     actual_print(x, end=end)
+            if len(sys.argv) > 2:
+                db.DEBUGGING[sys.argv[2]] = {}
+            else:
+                spec = importlib.util.spec_from_file_location("debugging", p)
+                debugging = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(debugging)
+                if (hasattr(debugging, 'main') and inspect.isfunction(debugging.main)):
+                    db.DEBUGGING["main"] = {}
 
             with open(p) as f:
                 code = compile(f.read(), p, 'exec')
                 exec(code)
 
             with open(p+".json", "w") as f:
-                json.dump(db.outputs, f)
+                json.dump(db.outputs, f, cls=SetEncoder)
 
         elif p.endswith(".json"):
             with open(p) as f:
